@@ -3,7 +3,7 @@ import axios from 'axios';
 import Papa from 'papaparse';
 import type { PortfolioContextValue, PortfolioState, Holding, WebhookHolding } from '../types';
 
-const WEBHOOK_URL = 'https://n8np.puribijay.com.np/webhook/51bef67d-e017-4fc8-92ca-896d8b6c329aa';
+const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL;
 const LTP_URL = 'https://ltp-ashen.vercel.app/ltp.json';
 
 const PortfolioContext = createContext<PortfolioContextValue | null>(null);
