@@ -16,9 +16,6 @@ export const usePortfolio = () => {
     return context;
 };
 
-// Add this interface locally if not in types
-// interface FundamentalMap { [key: string]: any } // Removed unused
-
 interface PortfolioProviderProps {
     children: ReactNode;
 }
