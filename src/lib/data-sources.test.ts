@@ -7,23 +7,23 @@ test('getDataSourceUrl should return correct URLs for all sources', () => {
 
     const cases = [
         {
-            key: 'merolagani',
+            key: 'merolagani' as const,
             expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${symbol}#0`
         },
         {
-            key: 'sharesansar',
+            key: 'sharesansar' as const,
             expected: `https://www.sharesansar.com/company/${symbol}`
         },
         {
-            key: 'nepsealpha',
+            key: 'nepsealpha' as const,
             expected: `https://nepsealpha.com/search?q=${symbol}`
         },
         {
-            key: 'nepalipaisa',
+            key: 'nepalipaisa' as const,
             expected: `https://nepalipaisa.com/company/${symbol}`
         },
         {
-            key: 'moneymitra',
+            key: 'moneymitra' as const,
             expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${symbol}/`
         }
     ];
@@ -34,7 +34,7 @@ test('getDataSourceUrl should return correct URLs for all sources', () => {
 });
 
 test('getDataSourceUrl should return null for unsupported keys', () => {
-    assert.strictEqual(getDataSourceUrl('unsupported', 'AAPL'), null);
+    assert.strictEqual(getDataSourceUrl('unsupported' as any, 'AAPL'), null);
 });
 
 test('getDataSourceUrl should return null for "ask" key which is in type but not in DATA_SOURCES', () => {
