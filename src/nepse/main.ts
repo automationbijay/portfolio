@@ -137,7 +137,6 @@ async function init(): Promise<void> {
 
     // Schedule next refresh at the next 15-minute mark
     const delay = getMillisecondsUntilNextRefresh();
-    console.log(`Next refresh in ${Math.round(delay / 1000 / 60)} minutes.`);
     setTimeout(init, delay);
 }
 
