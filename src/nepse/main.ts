@@ -14,12 +14,7 @@ async function fetchNepseData(): Promise<NepseEntry | null> {
         const json = await response.json();
         const data = json["all recent price"] || [];
 
-        for (const item of data) {
-            if (item.Script === "NEPSE Index") {
-                return item as NepseEntry;
-            }
-        }
-        return null;
+        return data.find((item: any) => item.Script === "NEPSE Index") as NepseEntry || null;
     } catch (error) {
         console.error("Failed to fetch NEPSE data:", error);
         return null;
