@@ -95,7 +95,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
 
     const refreshLtp = useCallback(async () => {
         if (!navigator.onLine) {
-            console.log("Offline: Skipping LTP refresh, using cached data.");
+            console.warn("Offline: Skipping LTP refresh, using cached data.");
             return;
         }
         setState(prev => ({ ...prev, loading: true }));
