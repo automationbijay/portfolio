@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import axios from 'axios';
 import Papa from 'papaparse';
 import type { PortfolioContextValue, PortfolioState, Holding, WebhookHolding } from '../types';
@@ -167,6 +167,23 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
         refreshLtp();
     }, [refreshLtp]);
 
+    // Pre-compute a dictionary for O(1) lookups whenever rawAnalysisData changes
+    const dataMap = useMemo(() => {
+        const map: Record<string, any> = {};
+        if (state.rawAnalysisData && Array.isArray(state.rawAnalysisData)) {
+            for (const item of state.rawAnalysisData) {
+                if (item && typeof item === 'object') {
+                    for (const key in item) {
+                        if (map[key] === undefined) {
+                            map[key] = item[key];
+                        }
+                    }
+                }
+            }
+        }
+        return map;
+    }, [state.rawAnalysisData]);
+
     // Recalculate Holdings when data changes
     useEffect(() => {
         if (Object.keys(state.ltpData).length === 0) return;
@@ -175,13 +192,9 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
         let totalInv = 0;
         let totalVal = 0;
 
-        // Helper to find data by key in any index of the rawAnalysisData array
+        // Helper to find data by key using the pre-computed dictionary
         const findDataByKey = (key: string) => {
-            if (!state.rawAnalysisData || !Array.isArray(state.rawAnalysisData)) return null;
-            for (const item of state.rawAnalysisData) {
-                if (item && item[key]) return item[key];
-            }
-            return null;
+            return dataMap[key] !== undefined ? dataMap[key] : null;
         };
 
         const activeDividendsRaw = findDataByKey("current holdings in dividents") || [];
@@ -403,7 +416,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             fundamentalAnalysis
         }));
 
-    }, [state.rawAnalysisData, state.ltpData, waccRawData, holdingsRawData, fundamentalsMap]);
+    }, [state.rawAnalysisData, state.ltpData, waccRawData, holdingsRawData, fundamentalsMap, dataMap, state.tradingHistory, state.dailyChanges]);
 
 
     const uploadData = async (waccFile: File, historyFile: File, holdingsFile?: File, tradeBookFile?: File) => {
