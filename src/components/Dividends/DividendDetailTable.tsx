@@ -89,8 +89,8 @@ export function DividendDetailTable() {
         );
     }
 
-    const totalHistorical = dividendDetails.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0);
-    const totalCurrent = activeDividends.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0);
+    const totalHistorical = useMemo(() => dividendDetails.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [dividendDetails]);
+    const totalCurrent = useMemo(() => activeDividends.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [activeDividends]);
 
     return (
         <div className="space-y-6 pb-8 text-foreground">
