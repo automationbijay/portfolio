@@ -85,8 +85,8 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             if (storedDailyChanges) setState(prev => ({ ...prev, dailyChanges: JSON.parse(storedDailyChanges) }));
             if (storedNepseData) setState(prev => ({ ...prev, nepseData: JSON.parse(storedNepseData) }));
             if (storedFundamentals) setFundamentalsMap(JSON.parse(storedFundamentals));
-        } catch (e) {
-            console.error("Failed to load local storage data", e);
+        } catch (e: unknown) {
+            console.error("Failed to load local storage data", e instanceof Error ? e.message : e);
         }
     }, []);
 
@@ -153,8 +153,8 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             localStorage.setItem('portfolioDailyChanges', JSON.stringify(changesMap));
             localStorage.setItem('portfolioFundamentals', JSON.stringify(fundamentals));
             if (nepseEntry) localStorage.setItem('portfolioNepseData', JSON.stringify(nepseEntry));
-        } catch (error) {
-            console.error("Failed to fetch LTP", error);
+        } catch (error: unknown) {
+            console.error("Failed to fetch LTP", error instanceof Error ? error.message : error);
             setState(prev => ({ ...prev, loading: false }));
         }
     }, []);
@@ -421,6 +421,12 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             setState(prev => ({ ...prev, error: "You are offline. Cannot analyze portfolio." }));
             throw new Error("You are offline. Cannot analyze portfolio.");
         }
+
+        if (!WEBHOOK_URL) {
+            setState(prev => ({ ...prev, error: "Webhook URL is not configured. Please set VITE_WEBHOOK_URL in your environment." }));
+            throw new Error("Webhook URL is not configured. Please set VITE_WEBHOOK_URL in your environment.");
+        }
+
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         try {
@@ -440,7 +446,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
                         const json = JSON.parse(e.target?.result as string);
                         setHoldingsRawData(json);
                         localStorage.setItem('portfolioHoldingsRaw', JSON.stringify(json));
-                    } catch (err) { console.error("Invalid JSON file"); }
+                    } catch (err: unknown) { console.error("Invalid JSON file", err instanceof Error ? err.message : err); }
                 };
                 reader.readAsText(holdingsFile);
             }
@@ -499,9 +505,10 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
                 loading: false
             }));
 
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err);
-            setState(prev => ({ ...prev, loading: false, error: "Failed to analyze portfolio. Please try again." }));
+            const errorMessage = err instanceof Error ? err.message : "Failed to analyze portfolio. Please try again.";
+            setState(prev => ({ ...prev, loading: false, error: errorMessage }));
             throw err;
         }
     };
