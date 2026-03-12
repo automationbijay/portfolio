@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "node --experimental-strip-types --test src/lib/data-sources.test.ts",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
