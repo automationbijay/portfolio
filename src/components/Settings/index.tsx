@@ -43,8 +43,9 @@ export function Settings({ onImportSuccess, onNavigateToTimeline, defaultSection
             await actions.reanalysePortfolio();
             setReanalyseMsg({ type: 'success', text: 'Portfolio reanalysed successfully!' });
             if (onImportSuccess) onImportSuccess();
-        } catch (err: any) {
-            setReanalyseMsg({ type: 'error', text: err.message || "Failed to reanalyse" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to reanalyse";
+            setReanalyseMsg({ type: 'error', text: message });
         } finally {
             setIsReanalysing(false);
         }
