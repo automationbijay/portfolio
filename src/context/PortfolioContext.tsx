@@ -185,7 +185,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
     useEffect(() => {
         if (Object.keys(state.ltpData).length === 0) return;
 
-        let calculatedHoldings: Holding[] = [];
+        const calculatedHoldings: Holding[] = [];
         let totalInv = 0;
         let totalVal = 0;
 

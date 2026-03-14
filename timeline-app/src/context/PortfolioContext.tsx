@@ -69,7 +69,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
     useEffect(() => {
         if (!state.rawAnalysisData || Object.keys(state.ltpData).length === 0) return;
 
-        let calculatedHoldings: Holding[] = [];
+        const calculatedHoldings: Holding[] = [];
 
         // Simplified Logic: Extract current holdings either from webhook response or WACC/Holdings sections
         // We will try to find "current holdings in meroshare" or similar structure
