@@ -110,7 +110,7 @@ function getMillisecondsUntilNextRefresh(): number {
     // Target times are :01, :16, :31, :46 (1 minute after each quarter hour)
     const targets = [1, 16, 31, 46];
 
-    let nextTarget = targets.find(t => t > minutes);
+    const nextTarget = targets.find(t => t > minutes);
     let minutesToWait: number;
 
     if (nextTarget !== undefined) {
