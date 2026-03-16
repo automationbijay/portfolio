@@ -1,0 +1,3 @@
+## 2024-05-24 - [HoldingsTable Performance Optimization]
+**Learning:** Using array indices as React keys causes unmounting/remounting of DOM nodes when re-ordering large arrays (e.g. during searching or sorting), leading to significant render overhead. Deferring the state value used for filtering large lists using `useDeferredValue` improves typing responsiveness and unblocks the main thread for text input.
+**Action:** Always use unique and stable identifiers (like `item.scrip`) as React keys instead of indices for rendered lists. Use `useDeferredValue` to de-prioritize expensive list-filtering computations when they depend on user input fields like search boxes.
