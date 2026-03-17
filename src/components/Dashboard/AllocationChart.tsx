@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { DonutChart } from '../ui/DonutChart';
@@ -7,15 +8,18 @@ const CHART_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#6
 export function AllocationChart() {
     const { state: { holdings, portfolioSummary } } = usePortfolio();
 
-    const chartData = [...holdings]
-        .sort((a, b) => b.currentValue - a.currentValue);
+    const { chartData, finalData } = useMemo(() => {
+        // Performance: Memoize array sorting and data slicing to prevent O(n log n) recalculation on every render
+        const sorted = [...holdings].sort((a, b) => b.currentValue - a.currentValue);
+        const mainAssets = sorted.slice(0, 5);
+        const othersValue = sorted.slice(5).reduce((sum, item) => sum + item.currentValue, 0);
 
-    const mainAssets = chartData.slice(0, 5);
-    const othersValue = chartData.slice(5).reduce((sum, item) => sum + item.currentValue, 0);
+        const data = othersValue > 0
+            ? [...mainAssets, { scrip: 'Others', currentValue: othersValue }]
+            : mainAssets;
 
-    const finalData = othersValue > 0
-        ? [...mainAssets, { scrip: 'Others', currentValue: othersValue }]
-        : mainAssets;
+        return { chartData: sorted, finalData: data };
+    }, [holdings]);
 
     return (
         <Card className="h-full overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-xl relative group">
