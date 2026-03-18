@@ -1,0 +1,3 @@
+## 2024-05-18 - [Dashboard Charts Memoization]
+**Learning:** Due to the 100% client-side data processing architecture, passing derived arrays directly to charting components (`DonutChart` in `SectorDistribution.tsx` and `AllocationChart.tsx`) without memoization causes expensive O(N log N) `map`, `reduce`, `slice`, and `sort` operations to fire on every render cycle (e.g., when the user hovers over the charts or interacts with the dashboard).
+**Action:** Always wrap heavy array operations (sorting, filtering, reducing large `holdings` arrays) in `useMemo` specifically when building derived state for visual components to prevent performance bottlenecks.
