@@ -1,0 +1,3 @@
+## 2026-02-04 - Redundant sorting and missing memoization for derived dashboard data
+**Learning:** The dashboard components `AllocationChart` and `SectorDistribution` were performing heavy `O(N log N)` sorting and `O(N)` reductions on every re-render. Additionally, the `holdings` array was already sorted by `currentValue` in `PortfolioContext.tsx`, making the sort in `AllocationChart` redundant. These calculations were not memoized, leading to unnecessary CPU overhead during component updates.
+**Action:** Always check upstream data processing (like Context providers) to avoid redundant operations. Use `useMemo` for derived data transformations in React components, especially when dealing with lists and aggregations, to prevent unnecessary recalculations on re-renders.
