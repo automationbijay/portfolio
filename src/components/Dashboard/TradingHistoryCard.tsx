@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { History, Ticket, Gavel, ArrowRightLeft, TrendingUp, TrendingDown, Gift, Coins, ScrollText, Calendar, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
@@ -22,11 +23,19 @@ export function TradingHistoryCard() {
     const { state } = usePortfolio();
     const { tradingHistory, dividendDetails } = state;
 
-    // Calculate integrated dividend metrics
-    const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
-    const dividendCount = dividendDetails?.length || 0;
+    // ⚡ Bolt Optimization: Memoize dividend metrics
+    // Why: Prevent reducing across `dividendDetails` on every render.
+    // Impact: Saves O(N) array iteration for large dividend history files.
+    const { totalCashDividend, dividendCount } = useMemo(() => {
+        const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
+        const dividendCount = dividendDetails?.length || 0;
+        return { totalCashDividend, dividendCount };
+    }, [dividendDetails]);
 
-    const getStatsByCategory = () => {
+    // ⚡ Bolt Optimization: Memoize section data (stats by category)
+    // Why: Prevent multiple `.map()` passes and creation of new objects/arrays on every render.
+    // Impact: Reduces unnecessary garbage collection overhead and rendering work.
+    const sections = useMemo(() => {
         if (!tradingHistory) return { market: [], rewards: [] };
 
         const data = (tradingHistory as any).allTime || tradingHistory;
@@ -56,13 +65,9 @@ export function TradingHistoryCard() {
             };
         };
 
-        const market = marketMapping
-            .map(m => mapItem(m));
+        const market = marketMapping.map(m => mapItem(m));
+        const rewards = rewardsMapping.map(m => mapItem(m));
 
-        const rewards = rewardsMapping
-            .map(m => mapItem(m));
-
-        // Add integrated dividend metrics to rewards
         if (dividendCount > 0) {
             rewards.push({
                 label: 'Total Cash Divident',
@@ -77,9 +82,8 @@ export function TradingHistoryCard() {
         }
 
         return { market, rewards };
-    };
+    }, [tradingHistory, dividendCount, totalCashDividend]);
 
-    const sections = getStatsByCategory();
     const hasData = sections.market.length > 0 || sections.rewards.length > 0;
 
     if (!tradingHistory || !hasData) {
