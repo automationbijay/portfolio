@@ -1,14 +1,18 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { PortfolioProvider } from './context/PortfolioContext';
 import { Layout } from './components/Layout';
-import { Dashboard } from './components/Dashboard';
-import { Portfolio } from './components/Portfolio';
-import { Dividends } from './components/Dividends';
-import { Settings } from './components/Settings';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
-
-
+// ⚡ Bolt Optimization: Code Splitting
+// What: Replaced static imports with React.lazy() for all main tab components.
+// Why: The application previously loaded all routes (Dashboard, Portfolio, etc.)
+//      on initial load, leading to a large main bundle and slower Time to Interactive.
+// Impact: Reduces initial JavaScript payload significantly. The build chunk size warning
+//         should now be resolved or greatly improved. Users only download code for the tab they visit.
+const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const Portfolio = lazy(() => import('./components/Portfolio').then(m => ({ default: m.Portfolio })));
+const Dividends = lazy(() => import('./components/Dividends').then(m => ({ default: m.Dividends })));
+const Settings = lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState(() => {
@@ -26,8 +30,9 @@ function AppContent() {
   }, [activeTab]);
 
   const renderContent = useMemo(() => {
+    let content;
     switch (activeTab) {
-      case 'home': return (
+      case 'home': content = (
         <Dashboard
           onNavigateToImport={() => {
             setSettingsSection('data');
@@ -35,16 +40,18 @@ function AppContent() {
           }}
         />
       );
-      case 'portfolio': return <Portfolio />;
-      case 'dividends': return <Dividends />;
-      case 'settings': return (
+      break;
+      case 'portfolio': content = <Portfolio />; break;
+      case 'dividends': content = <Dividends />; break;
+      case 'settings': content = (
         <Settings
           defaultSection={settingsSection}
           onImportSuccess={() => setActiveTab('home')}
           onNavigateToTimeline={() => setActiveTab('timeline')}
         />
       );
-      default: return (
+      break;
+      default: content = (
         <Dashboard
           onNavigateToImport={() => {
             setSettingsSection('data');
@@ -52,7 +59,17 @@ function AppContent() {
           }}
         />
       );
+      break;
     }
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-[50vh] text-muted-foreground animate-pulse font-mono text-sm tracking-widest uppercase">
+          Loading...
+        </div>
+      }>
+        {content}
+      </Suspense>
+    );
   }, [activeTab, settingsSection]);
 
   return (

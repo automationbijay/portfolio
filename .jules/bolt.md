@@ -1,0 +1,3 @@
+## 2024-03-26 - Added Code Splitting for Main Routes
+**Learning:** Initial application load time was significantly affected by loading all route components (Dashboard, Portfolio, Dividends, Settings) in a single bundle, which triggered chunk size warnings from Vite.
+**Action:** Implemented code splitting using `React.lazy()` and `Suspense`. Since the application uses named exports, I had to remap them to default exports using `.then(m => ({ default: m.ComponentName }))`. In the future, always consider code splitting early for large route components to improve Time to Interactive.
