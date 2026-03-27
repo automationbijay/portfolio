@@ -1,0 +1,3 @@
+## 2024-05-18 - [Optimization] Extracted invariant `toLowerCase()` in `useMemo` filter
+**Learning:** React component search features often filter through hundreds of items by calling `.toLowerCase()` on the search query. Calling it on every iteration inside a `.filter` block causes redundant string transformations.
+**Action:** Extract the lowercase conversion of `searchQuery` outside the `.filter` loop inside the `useMemo` hook. This ensures `toLowerCase()` is only executed once per render update, reducing processing overhead.
