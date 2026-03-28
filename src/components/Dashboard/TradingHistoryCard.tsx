@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { History, Ticket, Gavel, ArrowRightLeft, TrendingUp, TrendingDown, Gift, Coins, ScrollText, Calendar, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
@@ -18,15 +19,17 @@ const iconMap: Record<string, any> = {
     "Total Transactions": { icon: History, color: "text-slate-500", bg: "bg-slate-500/10" },
 };
 
-export function TradingHistoryCard() {
+// Memoized to prevent unnecessary re-renders when parent component updates
+export const TradingHistoryCard = React.memo(function TradingHistoryCard() {
     const { state } = usePortfolio();
     const { tradingHistory, dividendDetails } = state;
 
-    // Calculate integrated dividend metrics
-    const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
+    // Calculate integrated dividend metrics, memoized to prevent recalculation on every render
+    const totalCashDividend = useMemo(() => dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0, [dividendDetails]);
     const dividendCount = dividendDetails?.length || 0;
 
-    const getStatsByCategory = () => {
+    // Memoize the sections calculation so it only re-runs when trading history or dividend details change
+    const sections = useMemo(() => {
         if (!tradingHistory) return { market: [], rewards: [] };
 
         const data = (tradingHistory as any).allTime || tradingHistory;
@@ -77,9 +80,7 @@ export function TradingHistoryCard() {
         }
 
         return { market, rewards };
-    };
-
-    const sections = getStatsByCategory();
+    }, [tradingHistory, dividendCount, totalCashDividend]);
     const hasData = sections.market.length > 0 || sections.rewards.length > 0;
 
     if (!tradingHistory || !hasData) {
@@ -200,4 +201,4 @@ export function TradingHistoryCard() {
             </CardContent>
         </Card>
     );
-}
+});

@@ -1,43 +1,48 @@
+import React, { useMemo } from 'react';
 import { BarChart2, TrendingUp, TrendingDown, Activity, Clock } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { cn, formatCurrency } from '../../lib/utils';
 
-export function NepseTodayCard() {
+// Memoized to prevent unnecessary re-renders when parent component updates
+export const NepseTodayCard = React.memo(function NepseTodayCard() {
     const { state } = usePortfolio();
     const { nepseData, loading } = state;
 
-    if (loading && !nepseData) {
-        return (
-            <Card className="shadow-lg border-border/60 bg-card/60 backdrop-blur-sm animate-pulse">
-                <div className="h-32" />
-            </Card>
-        );
-    }
+    // Memoize the market data extraction to avoid recalculating string formats on every render
+    const marketData = useMemo(() => {
+        if (!nepseData) return null;
 
-    if (!nepseData) return null;
+        const getMarketStatus = () => {
+            const now = new Date();
+            // Convert to Nepal Time (UTC+5:45) if not already
+            // In this environment, the system time is already local to the user if configured,
+            // but it's safer to use the provided local time as a reference.
+            const day = now.getDay(); // 0 is Sunday, 1 is Monday, ..., 4 is Thursday
+            const hour = now.getHours();
 
-    const getMarketStatus = () => {
-        const now = new Date();
-        // Convert to Nepal Time (UTC+5:45) if not already
-        // In this environment, the system time is already local to the user if configured, 
-        // but it's safer to use the provided local time as a reference.
-        const day = now.getDay(); // 0 is Sunday, 1 is Monday, ..., 4 is Thursday
-        const hour = now.getHours();
+            const isMarketDay = day >= 0 && day <= 4; // Sunday to Thursday
+            const isMarketTime = hour >= 11 && hour < 15; // 11:00 AM to 3:00 PM
 
-        const isMarketDay = day >= 0 && day <= 4; // Sunday to Thursday
-        const isMarketTime = hour >= 11 && hour < 15; // 11:00 AM to 3:00 PM
+            return (isMarketDay && isMarketTime) ? "Live" : "Close";
+        };
 
-        return (isMarketDay && isMarketTime) ? "Live" : "Close";
-    };
+        return {
+            index: nepseData.Price.toLocaleString(),
+            change: (nepseData["change in value"] >= 0 ? '+' : '') + nepseData["change in value"].toFixed(2),
+            percentChange: (nepseData["Ltp change percent"] >= 0 ? '+' : '') + nepseData["Ltp change percent"].toFixed(2) + '%',
+            turnover: nepseData.turnover > 0 ? (nepseData.turnover / 1000000000).toFixed(2) + " Arba" : "N/A",
+            status: getMarketStatus()
+        }
+    }, [nepseData]);
 
-    const marketData = {
-        index: nepseData.Price.toLocaleString(),
-        change: (nepseData["change in value"] >= 0 ? '+' : '') + nepseData["change in value"].toFixed(2),
-        percentChange: (nepseData["Ltp change percent"] >= 0 ? '+' : '') + nepseData["Ltp change percent"].toFixed(2) + '%',
-        turnover: nepseData.turnover > 0 ? (nepseData.turnover / 1000000000).toFixed(2) + " Arba" : "N/A",
-        status: getMarketStatus()
-    };
+    if (loading && !nepseData) return (
+        <Card className="shadow-lg border-border/60 bg-card/60 backdrop-blur-sm animate-pulse">
+            <div className="h-32" />
+        </Card>
+    );
+
+    if (!nepseData || !marketData) return null;
 
     const isPositive = nepseData["change in value"] >= 0;
 
@@ -96,4 +101,4 @@ export function NepseTodayCard() {
             </CardContent>
         </Card>
     );
-}
+});

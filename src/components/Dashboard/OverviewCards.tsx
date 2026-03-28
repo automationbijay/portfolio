@@ -1,10 +1,11 @@
+import React from 'react';
 import { TrendingUp, TrendingDown, Wallet, BarChart3, CircleDollarSign } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { Card, CardContent } from '../ui/Card';
 import { RatioCard } from './RatioCard';
 import { cn, formatCurrency } from '../../lib/utils';
 
-export function OverviewCards() {
+export const OverviewCards = React.memo(function OverviewCards() {
     const { state } = usePortfolio();
     const { portfolioSummary } = state;
     const { investment, value, pl, plPercent, activeDividendTotal, plWithCashflow, plWithCashflowPercent } = portfolioSummary;
@@ -142,4 +143,4 @@ export function OverviewCards() {
             />
         </>
     );
-}
+});
