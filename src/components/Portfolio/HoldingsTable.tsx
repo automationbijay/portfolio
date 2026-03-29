@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue } from 'react';
 import { ArrowUpDown, Briefcase, Search } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import type { Holding } from '../../types';
@@ -25,14 +25,16 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
     const { investment, value, pl, plPercent, activeDividendTotal, scripCount, plWithCashflow, plWithCashflowPercent } = portfolioSummary;
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'currentValue', direction: 'desc' });
     const [searchQuery, setSearchQuery] = useState('');
+    const deferredSearchQuery = useDeferredValue(searchQuery);
 
     const sortedHoldings = useMemo(() => {
         const { key, direction } = sortConfig;
+        const lowerCaseQuery = deferredSearchQuery.toLowerCase();
 
         // Filter first
         const filtered = holdings.filter(item =>
-            item.scrip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.scrip.toLowerCase().includes(lowerCaseQuery) ||
+            (item.companyName && item.companyName.toLowerCase().includes(lowerCaseQuery))
         );
 
         return [...filtered].sort((a, b) => {
@@ -49,7 +51,7 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
             if (valA > valB) return direction === 'asc' ? 1 : -1;
             return 0;
         });
-    }, [holdings, sortConfig, searchQuery]);
+    }, [holdings, sortConfig, deferredSearchQuery]);
 
     const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const [key, direction] = e.target.value.split(':') as [SortKey, SortDirection];
