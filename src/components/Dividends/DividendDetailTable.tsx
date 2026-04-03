@@ -30,8 +30,10 @@ export function DividendDetailTable() {
 
         let filtered = dataToFilter;
         if (searchQuery) {
+            // ⚡ Bolt: Extract string transformation outside of the filter loop for better performance
+            const lowerCaseSearch = searchQuery.toLowerCase();
             filtered = dataToFilter.filter(item =>
-                item.Scrip.toLowerCase().includes(searchQuery.toLowerCase())
+                item.Scrip.toLowerCase().includes(lowerCaseSearch)
             );
         }
 

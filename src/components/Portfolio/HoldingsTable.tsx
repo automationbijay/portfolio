@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue } from 'react';
 import { ArrowUpDown, Briefcase, Search } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import type { Holding } from '../../types';
@@ -25,14 +25,18 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
     const { investment, value, pl, plPercent, activeDividendTotal, scripCount, plWithCashflow, plWithCashflowPercent } = portfolioSummary;
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'currentValue', direction: 'desc' });
     const [searchQuery, setSearchQuery] = useState('');
+    // ⚡ Bolt: Defer search query to keep the UI responsive while typing
+    const deferredSearchQuery = useDeferredValue(searchQuery);
 
     const sortedHoldings = useMemo(() => {
         const { key, direction } = sortConfig;
 
         // Filter first
+        // ⚡ Bolt: Extract string transformation outside of the filter loop for better performance
+        const lowerCaseSearch = deferredSearchQuery.toLowerCase();
         const filtered = holdings.filter(item =>
-            item.scrip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.scrip.toLowerCase().includes(lowerCaseSearch) ||
+            (item.companyName && item.companyName.toLowerCase().includes(lowerCaseSearch))
         );
 
         return [...filtered].sort((a, b) => {
@@ -49,7 +53,7 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
             if (valA > valB) return direction === 'asc' ? 1 : -1;
             return 0;
         });
-    }, [holdings, sortConfig, searchQuery]);
+    }, [holdings, sortConfig, deferredSearchQuery]);
 
     const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const [key, direction] = e.target.value.split(':') as [SortKey, SortDirection];
@@ -166,8 +170,9 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {sortedHoldings.map((item, idx) => (
-                    <Card key={idx} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
+                {/* ⚡ Bolt: Use stable, unique identifier (item.scrip) instead of array index for better React reconciliation performance */}
+                {sortedHoldings.map((item) => (
+                    <Card key={item.scrip} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
                         <CardContent className="p-0">
                             <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x border-border/40">
                                 {/* Scrip Info */}
