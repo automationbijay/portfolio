@@ -30,14 +30,17 @@ export function DividendDetailTable() {
 
         let filtered = dataToFilter;
         if (searchQuery) {
+            // ⚡ Bolt: Extracted searchQuery toLowerCase out of filter loop
+            // Impact: Converts O(N) toLowerCase calls into O(1) for faster searching
+            const searchLower = searchQuery.toLowerCase();
             filtered = dataToFilter.filter(item =>
-                item.Scrip.toLowerCase().includes(searchQuery.toLowerCase())
+                item.Scrip.toLowerCase().includes(searchLower)
             );
         }
 
         return [...filtered].sort((a, b) => {
-            let valA: any = a[key as keyof DividendEvent] ?? 0;
-            let valB: any = b[key as keyof DividendEvent] ?? 0;
+            let valA: string | number = a[key as keyof DividendEvent] ?? 0;
+            let valB: string | number = b[key as keyof DividendEvent] ?? 0;
 
             if (key === 'Book Closure Date') {
                 valA = new Date(valA).getTime();
@@ -54,6 +57,9 @@ export function DividendDetailTable() {
         const [key, direction] = e.target.value.split(':') as [SortKey, SortDirection];
         setSortConfig({ key, direction });
     };
+
+    const totalHistorical = useMemo(() => dividendDetails.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [dividendDetails]);
+    const totalCurrent = useMemo(() => activeDividends.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [activeDividends]);
 
     if (!baseData || baseData.length === 0) {
         // If we are showing "Active Only" and it's empty, but we have historical data, show the filter toggle along with "No records"
@@ -88,9 +94,6 @@ export function DividendDetailTable() {
             </div>
         );
     }
-
-    const totalHistorical = useMemo(() => dividendDetails.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [dividendDetails]);
-    const totalCurrent = useMemo(() => activeDividends.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [activeDividends]);
 
     return (
         <div className="space-y-6 pb-8 text-foreground">

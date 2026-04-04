@@ -18,7 +18,11 @@ export function ScripDetails({ scrip, onBack }: ScripDetailsProps) {
 
     const scripTransactions = useMemo(() => {
         if (!transactionHistory) return [];
-        return transactionHistory.filter(t => t.Scrip === scrip);
+        // ⚡ Bolt: Moved transaction sorting and date parsing into useMemo
+        // Impact: Prevents expensive date parsing and O(N log N) sorting on every component render
+        return transactionHistory
+            .filter(t => t.Scrip === scrip)
+            .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
     }, [transactionHistory, scrip]);
 
     // Get dividends for this scrip
@@ -299,7 +303,7 @@ export function ScripDetails({ scrip, onBack }: ScripDetailsProps) {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/20">
-                                        {[...scripTransactions].sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime()).map((tx, idx) => (
+                                        {scripTransactions.map((tx, idx) => (
                                             <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/tx">
                                                 <td className="p-4">
                                                     <div className="text-sm font-black font-mono text-foreground opacity-90">{tx.Date}</div>
@@ -371,7 +375,7 @@ export function ScripDetails({ scrip, onBack }: ScripDetailsProps) {
                                     {scripDividends.map((div, idx) => (
                                         <tr key={idx} className="hover:bg-amber-500/[0.02] transition-colors group/row">
                                             <td className="p-4">
-                                                <div className="text-sm font-black text-foreground">{(div as any)["Fiscal Year"] || "---"}</div>
+                                                <div className="text-sm font-black text-foreground">{(div as Record<string, unknown>)["Fiscal Year"] as string || "---"}</div>
                                                 <div className="text-[10px] text-amber-600/70 font-black uppercase tracking-widest">{div["Cash %"]}% Cash Bonus</div>
                                             </td>
                                             <td className="p-4 text-center">

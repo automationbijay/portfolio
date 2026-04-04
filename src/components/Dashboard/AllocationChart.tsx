@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { DonutChart } from '../ui/DonutChart';
@@ -7,15 +8,17 @@ const CHART_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#6
 export function AllocationChart() {
     const { state: { holdings, portfolioSummary } } = usePortfolio();
 
-    const chartData = [...holdings]
-        .sort((a, b) => b.currentValue - a.currentValue);
-
-    const mainAssets = chartData.slice(0, 5);
-    const othersValue = chartData.slice(5).reduce((sum, item) => sum + item.currentValue, 0);
-
-    const finalData = othersValue > 0
-        ? [...mainAssets, { scrip: 'Others', currentValue: othersValue }]
-        : mainAssets;
+    // ⚡ Bolt: Wrapped chart data calculation in useMemo to prevent sorting and reducing on every render
+    // Impact: Avoids O(N log N) sorting and O(N) reduction on every render cycle when dashboard updates
+    const { finalData, chartData } = useMemo(() => {
+        const sortedData = [...holdings].sort((a, b) => b.currentValue - a.currentValue);
+        const mainAssets = sortedData.slice(0, 5);
+        const othersValue = sortedData.slice(5).reduce((sum, item) => sum + item.currentValue, 0);
+        const processedData = othersValue > 0
+            ? [...mainAssets, { scrip: 'Others', currentValue: othersValue }]
+            : mainAssets;
+        return { finalData: processedData, chartData: sortedData };
+    }, [holdings]);
 
     return (
         <Card className="h-full overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-xl relative group">
