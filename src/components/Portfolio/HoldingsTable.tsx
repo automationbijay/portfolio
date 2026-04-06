@@ -29,10 +29,13 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
     const sortedHoldings = useMemo(() => {
         const { key, direction } = sortConfig;
 
+        // ⚡ Bolt: Hoisted searchQuery.toLowerCase() to prevent redundant calculations on every loop iteration
+        const query = searchQuery.toLowerCase();
+
         // Filter first
         const filtered = holdings.filter(item =>
-            item.scrip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.scrip.toLowerCase().includes(query) ||
+            (item.companyName && item.companyName.toLowerCase().includes(query))
         );
 
         return [...filtered].sort((a, b) => {
@@ -166,8 +169,9 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {sortedHoldings.map((item, idx) => (
-                    <Card key={idx} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
+                {sortedHoldings.map((item) => (
+                    {/* ⚡ Bolt: Switched to stable `item.scrip` key from `idx` to prevent cascading DOM mutations on sort/filter */}
+                    <Card key={item.scrip} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
                         <CardContent className="p-0">
                             <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x border-border/40">
                                 {/* Scrip Info */}
