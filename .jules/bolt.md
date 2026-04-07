@@ -1,0 +1,3 @@
+## 2024-04-07 - React Anti-Pattern: Memoizing Primitive Operations
+**Learning:** Wrapping basic mathematical comparisons (like `pl >= 0`) in `useMemo` degrades performance instead of improving it. The overhead of invoking `useMemo`, allocating memory for the dependency array, and running the dependency comparison logic is significantly more expensive than simply executing a primitive boolean check on every render.
+**Action:** Only use `useMemo` for expensive computations (e.g. mapping over large arrays) or preserving referential equality for object/array props, never for simple arithmetic or boolean checks.
