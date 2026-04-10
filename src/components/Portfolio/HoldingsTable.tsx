@@ -29,10 +29,12 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
     const sortedHoldings = useMemo(() => {
         const { key, direction } = sortConfig;
 
+        const lowercaseSearchQuery = searchQuery.toLowerCase();
+
         // Filter first
         const filtered = holdings.filter(item =>
-            item.scrip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.scrip.toLowerCase().includes(lowercaseSearchQuery) ||
+            (item.companyName && item.companyName.toLowerCase().includes(lowercaseSearchQuery))
         );
 
         return [...filtered].sort((a, b) => {
