@@ -1,0 +1,3 @@
+## 2024-05-20 - React Array Key Anti-Pattern and Unnecessary Re-renders
+**Learning:** Found a common performance issue in `src/components/Portfolio/HoldingsTable.tsx` where an array of complex UI cards was rendered using index as the React `key` inside the mapping function. Also, the card component was defined inline and not memoized, causing all elements to unnecessarily re-render on state changes in the parent (e.g. typing a search query).
+**Action:** Extract list items into standalone components wrapped with `React.memo`, use unique identifiers for `key` props (like `item.scrip`), and wrap handler functions passed as props with `useCallback` to preserve reference equality.
