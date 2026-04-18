@@ -1,0 +1,3 @@
+## 2025-02-24 - Avoid Expensive Date Sorting in Render Loop
+**Learning:** Performing a sort operation with `new Date()` parsing inside the render loop (like `[...data].sort((a,b) => new Date(b.date) - new Date(a.date))`) can cause noticeable lag in React applications, especially when the component depends on a rapidly updating Context (like live price feeds).
+**Action:** Always wrap expensive sorting and mapping operations in `useMemo`, depending only on the data that changes. If data comes from context but isn't part of the sort, the component shouldn't re-calculate the sorted array.
