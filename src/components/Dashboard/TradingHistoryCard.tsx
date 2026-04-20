@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { History, Ticket, Gavel, ArrowRightLeft, TrendingUp, TrendingDown, Gift, Coins, ScrollText, Calendar, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
@@ -22,11 +23,12 @@ export function TradingHistoryCard() {
     const { state } = usePortfolio();
     const { tradingHistory, dividendDetails } = state;
 
-    // Calculate integrated dividend metrics
-    const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
-    const dividendCount = dividendDetails?.length || 0;
+    const sections = useMemo(() => {
+        // ⚡ Bolt Optimization: Memoized calculation of dividend metrics and mapping
+        // to prevent unnecessary recalculations on every render.
+        const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
+        const dividendCount = dividendDetails?.length || 0;
 
-    const getStatsByCategory = () => {
         if (!tradingHistory) return { market: [], rewards: [] };
 
         const data = (tradingHistory as any).allTime || tradingHistory;
@@ -56,11 +58,8 @@ export function TradingHistoryCard() {
             };
         };
 
-        const market = marketMapping
-            .map(m => mapItem(m));
-
-        const rewards = rewardsMapping
-            .map(m => mapItem(m));
+        const market = marketMapping.map(m => mapItem(m));
+        const rewards = rewardsMapping.map(m => mapItem(m));
 
         // Add integrated dividend metrics to rewards
         if (dividendCount > 0) {
@@ -77,9 +76,7 @@ export function TradingHistoryCard() {
         }
 
         return { market, rewards };
-    };
-
-    const sections = getStatsByCategory();
+    }, [tradingHistory, dividendDetails]);
     const hasData = sections.market.length > 0 || sections.rewards.length > 0;
 
     if (!tradingHistory || !hasData) {
