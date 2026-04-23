@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { DonutChart } from '../ui/DonutChart';
@@ -7,21 +8,26 @@ const SECTOR_COLORS = ['#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#
 export function SectorDistribution() {
     const { state: { holdings, portfolioSummary } } = usePortfolio();
 
-    const sectorMap = holdings.reduce((acc, item) => {
-        acc[item.sector] = (acc[item.sector] || 0) + item.currentValue;
-        return acc;
-    }, {} as Record<string, number>);
+    // ⚡ Bolt Optimization: Memoize sector calculation to prevent unnecessary O(n log n) sorting on every re-render
+    const { sectorData, finalData } = useMemo(() => {
+        const sectorMap = holdings.reduce((acc, item) => {
+            acc[item.sector] = (acc[item.sector] || 0) + item.currentValue;
+            return acc;
+        }, {} as Record<string, number>);
 
-    const sectorData = Object.entries(sectorMap)
-        .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value);
+        const sortedData = Object.entries(sectorMap)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
 
-    const mainSectors = sectorData.slice(0, 5);
-    const othersValue = sectorData.slice(5).reduce((sum, item) => sum + item.value, 0);
+        const mainSectors = sortedData.slice(0, 5);
+        const othersValue = sortedData.slice(5).reduce((sum, item) => sum + item.value, 0);
 
-    const finalData = othersValue > 0
-        ? [...mainSectors, { name: 'Others', value: othersValue }]
-        : mainSectors;
+        const data = othersValue > 0
+            ? [...mainSectors, { name: 'Others', value: othersValue }]
+            : mainSectors;
+
+        return { sectorData: sortedData, finalData: data };
+    }, [holdings]);
 
     return (
         <Card className="h-full overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-xl relative group">
