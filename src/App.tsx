@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { PortfolioProvider } from './context/PortfolioContext';
 import { Layout } from './components/Layout';
-import { Dashboard } from './components/Dashboard';
-import { Portfolio } from './components/Portfolio';
-import { Dividends } from './components/Dividends';
-import { Settings } from './components/Settings';
+const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const Portfolio = lazy(() => import('./components/Portfolio').then(m => ({ default: m.Portfolio })));
+const Dividends = lazy(() => import('./components/Dividends').then(m => ({ default: m.Dividends })));
+const Settings = lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 
@@ -57,7 +57,9 @@ function AppContent() {
 
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-      {renderContent}
+      <Suspense fallback={<div className="p-8 flex justify-center"><div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div></div>}>
+        {renderContent}
+      </Suspense>
     </Layout>
   );
 }
