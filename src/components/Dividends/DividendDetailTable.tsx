@@ -55,6 +55,9 @@ export function DividendDetailTable() {
         setSortConfig({ key, direction });
     };
 
+    const totalHistorical = useMemo(() => dividendDetails.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [dividendDetails]);
+    const totalCurrent = useMemo(() => activeDividends.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [activeDividends]);
+
     if (!baseData || baseData.length === 0) {
         // If we are showing "Active Only" and it's empty, but we have historical data, show the filter toggle along with "No records"
         // But if we have NO data at all (dividendDetails empty), show Import
@@ -88,9 +91,6 @@ export function DividendDetailTable() {
             </div>
         );
     }
-
-    const totalHistorical = useMemo(() => dividendDetails.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [dividendDetails]);
-    const totalCurrent = useMemo(() => activeDividends.reduce((acc, curr) => acc + (curr["Dividend Amount"] || 0), 0), [activeDividends]);
 
     return (
         <div className="space-y-6 pb-8 text-foreground">
