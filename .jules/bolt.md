@@ -1,0 +1,3 @@
+## 2024-05-18 - Vite React Code Splitting
+**Learning:** The initial build showed a massive `main` bundle chunk (`> 720 kB` parsed, `> 210 kB` gzip). In a single-page React app with multiple dense routes (like complex Dashboards and settings panels), loading all components on initial page load causes slow First Contentful Paint. Code-splitting top-level routes/tabs using `React.lazy` dramatically slices the main bundle down (to roughly `~300 kB` parsed, `~100 kB` gzip), ensuring faster initial loads while dynamically fetching secondary chunks on demand.
+**Action:** Always check the Vite build output for chunk size warnings `(!)` and use dynamic imports (`React.lazy`) for top-level routing/tab components to maintain a lightweight core bundle.

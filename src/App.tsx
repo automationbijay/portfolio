@@ -1,11 +1,13 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { PortfolioProvider } from './context/PortfolioContext';
 import { Layout } from './components/Layout';
-import { Dashboard } from './components/Dashboard';
-import { Portfolio } from './components/Portfolio';
-import { Dividends } from './components/Dividends';
-import { Settings } from './components/Settings';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+
+// Lazy load top-level tab components for code splitting
+const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
+const Portfolio = lazy(() => import('./components/Portfolio').then(module => ({ default: module.Portfolio })));
+const Dividends = lazy(() => import('./components/Dividends').then(module => ({ default: module.Dividends })));
+const Settings = lazy(() => import('./components/Settings').then(module => ({ default: module.Settings })));
 
 
 
@@ -57,7 +59,9 @@ function AppContent() {
 
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-      {renderContent}
+      <Suspense fallback={<div className="flex h-full items-center justify-center p-8"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+        {renderContent}
+      </Suspense>
     </Layout>
   );
 }
