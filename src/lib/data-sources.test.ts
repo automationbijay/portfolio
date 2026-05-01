@@ -8,29 +8,38 @@ test('getDataSourceUrl should return correct URLs for all sources', () => {
     const cases: { key: DataSourceKey; expected: string }[] = [
         {
             key: 'merolagani',
-            expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${symbol}#0`
+            expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${encodeURIComponent(symbol)}#0`
         },
         {
             key: 'sharesansar',
-            expected: `https://www.sharesansar.com/company/${symbol}`
+            expected: `https://www.sharesansar.com/company/${encodeURIComponent(symbol)}`
         },
         {
             key: 'nepsealpha',
-            expected: `https://nepsealpha.com/search?q=${symbol}`
+            expected: `https://nepsealpha.com/search?q=${encodeURIComponent(symbol)}`
         },
         {
             key: 'nepalipaisa',
-            expected: `https://nepalipaisa.com/company/${symbol}`
+            expected: `https://nepalipaisa.com/company/${encodeURIComponent(symbol)}`
         },
         {
             key: 'moneymitra',
-            expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${symbol}/`
+            expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${encodeURIComponent(symbol)}/`
         }
     ];
 
     cases.forEach(({ key, expected }) => {
         assert.strictEqual(getDataSourceUrl(key, symbol), expected, `Failed for key: ${key}`);
     });
+});
+
+test('getDataSourceUrl should correctly encode special characters in symbols', () => {
+    const symbol = 'NICA & CO';
+    const encodedSymbol = encodeURIComponent(symbol);
+
+    assert.strictEqual(getDataSourceUrl('merolagani', symbol), `https://merolagani.com/CompanyDetail.aspx?symbol=${encodedSymbol}#0`);
+    assert.strictEqual(getDataSourceUrl('sharesansar', symbol), `https://www.sharesansar.com/company/${encodedSymbol}`);
+    assert.strictEqual(getDataSourceUrl('nepsealpha', symbol), `https://nepsealpha.com/search?q=${encodedSymbol}`);
 });
 
 test('getDataSourceUrl should return null for unsupported keys', () => {
