@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import axios from 'axios';
 import Papa from 'papaparse';
 import type { PortfolioContextValue, PortfolioState, Holding, WebhookHolding } from '../types';
+import { isValidKey } from '../lib/utils';
 
 const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL;
 const LTP_URL = 'https://ltp-ashen.vercel.app/ltp.json';
@@ -73,7 +74,6 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             if (storedHoldings) setHoldingsRawData(JSON.parse(storedHoldings));
             if (storedLastUpdated) setState(prev => ({ ...prev, lastUpdated: new Date(storedLastUpdated) }));
             if (storedBrokerNo) setState(prev => ({ ...prev, brokerNo: parseInt(storedBrokerNo) }));
-            if (storedBrokerNo) setState(prev => ({ ...prev, brokerNo: parseInt(storedBrokerNo) }));
             const storedPlViewMode = localStorage.getItem('portfolioPlViewMode');
             if (storedPlViewMode === 'unadjusted' || storedPlViewMode === 'adjusted') {
                 setState(prev => ({ ...prev, plViewMode: storedPlViewMode }));
@@ -105,6 +105,9 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
 
             let nepseEntry: any = null;
             data.forEach((item: any) => {
+                // Security check for Script name to prevent prototype pollution
+                if (!item.Script || !isValidKey(item.Script)) return;
+
                 if (item.Script === "NEPSE Index") {
                     // Safe parsing for NEPSE Index fields
                     const priceVal = typeof item.Price === 'string' ? parseFloat(item.Price.replace(/,/g, '')) : item.Price;
@@ -171,7 +174,8 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             for (const item of state.rawAnalysisData) {
                 if (item && typeof item === 'object') {
                     for (const key in item) {
-                        if (map[key] === undefined) {
+                        // Security check to prevent prototype pollution
+                        if (isValidKey(key) && map[key] === undefined) {
                             map[key] = item[key];
                         }
                     }
