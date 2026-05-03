@@ -18,3 +18,10 @@ export function formatNumber(value: number): string {
         maximumFractionDigits: 2,
     }).format(value);
 }
+
+/**
+ * Validates a key to prevent prototype pollution
+ */
+export function isValidKey(key: string): boolean {
+    return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
