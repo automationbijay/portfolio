@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { History, Ticket, Gavel, ArrowRightLeft, TrendingUp, TrendingDown, Gift, Coins, ScrollText, Calendar, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
     "IPOs Allotted": { icon: Ticket, color: "text-blue-500", bg: "bg-blue-500/10" },
     "FPOs Allotted": { icon: Ticket, color: "text-indigo-500", bg: "bg-indigo-500/10" },
     "Auctions Allotted": { icon: Gavel, color: "text-amber-500", bg: "bg-amber-500/10" },
@@ -22,14 +23,14 @@ export function TradingHistoryCard() {
     const { state } = usePortfolio();
     const { tradingHistory, dividendDetails } = state;
 
-    // Calculate integrated dividend metrics
-    const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
-    const dividendCount = dividendDetails?.length || 0;
+    const { sections } = useMemo(() => {
+        // Calculate integrated dividend metrics
+        const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
+        const dividendCount = dividendDetails?.length || 0;
 
-    const getStatsByCategory = () => {
-        if (!tradingHistory) return { market: [], rewards: [] };
+        if (!tradingHistory) return { sections: { market: [], rewards: [] } };
 
-        const data = (tradingHistory as any).allTime || tradingHistory;
+        const data = ((tradingHistory as Record<string, unknown>).allTime as Record<string, unknown>) || tradingHistory as Record<string, unknown>;
 
         const marketMapping = [
             { key: 'iposAllotted', label: 'IPOs Allotted', format: (val: number) => val || 0 },
@@ -45,9 +46,9 @@ export function TradingHistoryCard() {
             { key: 'rightShare', label: 'Right share alloted', format: (val: number) => val || 0 },
         ];
 
-        const mapItem = (m: any) => {
+        const mapItem = (m: { key: string; label: string; format?: (val: number) => number | string }) => {
             const config = iconMap[m.label] || { icon: ScrollText, color: "text-slate-500", bg: "bg-slate-500/10" };
-            const rawValue = data[m.key];
+            const rawValue = data[m.key] as number;
             const formattedValue = m.format ? m.format(rawValue) : rawValue;
             return {
                 label: m.label,
@@ -76,10 +77,9 @@ export function TradingHistoryCard() {
             });
         }
 
-        return { market, rewards };
-    };
+        return { sections: { market, rewards } };
+    }, [tradingHistory, dividendDetails]);
 
-    const sections = getStatsByCategory();
     const hasData = sections.market.length > 0 || sections.rewards.length > 0;
 
     if (!tradingHistory || !hasData) {
@@ -99,8 +99,8 @@ export function TradingHistoryCard() {
         );
     }
 
-    const normalizedData = (tradingHistory as any).allTime || tradingHistory;
-    const root = tradingHistory as any;
+    const normalizedData = ((tradingHistory as Record<string, unknown>).allTime as Record<string, unknown>) || tradingHistory as Record<string, unknown>;
+    const root = tradingHistory as Record<string, unknown>;
 
     return (
         <Card className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-xl relative group mt-8">
@@ -111,7 +111,7 @@ export function TradingHistoryCard() {
                         <ScrollText className="w-5 h-5 text-primary" />
                         Investor Journey
                     </div>
-                    {root.activeInMarket && (
+                    {root.activeInMarket as boolean && (
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-sm shadow-emerald-500/5 transition-all hover:bg-emerald-500/20">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -130,19 +130,19 @@ export function TradingHistoryCard() {
                         <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                             <Calendar className="w-3 h-3" /> Investor Since
                         </div>
-                        <div className="text-sm font-black text-foreground">{normalizedData.tradingStartDate || 'N/A'}</div>
+                        <div className="text-sm font-black text-foreground">{(normalizedData.tradingStartDate as string) || 'N/A'}</div>
                     </div>
                     <div className="relative">
                         <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                             <Activity className="w-3 h-3" /> Last Activity
                         </div>
-                        <div className="text-sm font-black text-foreground">{normalizedData.recentTradingDate || 'N/A'}</div>
+                        <div className="text-sm font-black text-foreground">{(normalizedData.recentTradingDate as string) || 'N/A'}</div>
                     </div>
                     <div className="relative">
                         <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                             <History className="w-3 h-3" /> Total Events
                         </div>
-                        <div className="text-sm font-black text-foreground">{normalizedData.totalTransactions || 0}</div>
+                        <div className="text-sm font-black text-foreground">{(normalizedData.totalTransactions as number) || 0}</div>
                     </div>
                 </div>
 
@@ -154,7 +154,7 @@ export function TradingHistoryCard() {
                         <div className="h-px flex-1 bg-border/40" />
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                        {sections.market.map((stat: any, idx: number) => (
+                        {sections.market.map((stat: { icon: React.ElementType; label: string; value: string | number; bg: string; color: string }, idx: number) => (
                             <div key={idx} className="bg-card/40 backdrop-blur-sm border border-border/40 rounded-2xl p-4 hover:bg-primary/5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-default flex flex-col items-center text-center gap-2 group/item">
                                 <div className={`p-2.5 rounded-full ${stat.bg} ${stat.color} mb-1 group-hover/item:scale-110 transition-transform`}>
                                     <stat.icon className="w-4 h-4" />
@@ -180,7 +180,7 @@ export function TradingHistoryCard() {
                         <div className="h-px flex-1 bg-border/40" />
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {sections.rewards.map((stat: any, idx: number) => (
+                        {sections.rewards.map((stat: { icon: React.ElementType; label: string; value: string | number; bg: string; color: string }, idx: number) => (
                             <div key={idx} className="bg-emerald-500/[0.02] backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-4 hover:bg-emerald-500/10 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-default flex flex-col items-center text-center gap-2 group/item">
                                 <div className={`p-2.5 rounded-full ${stat.bg} ${stat.color} mb-1 group-hover/item:scale-110 transition-transform`}>
                                     <stat.icon className="w-4 h-4" />
