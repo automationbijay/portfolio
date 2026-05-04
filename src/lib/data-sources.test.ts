@@ -41,3 +41,10 @@ test('getDataSourceUrl should return null for unsupported keys', () => {
 test('getDataSourceUrl should return null for "ask" key which is in type but not in DATA_SOURCES', () => {
     assert.strictEqual(getDataSourceUrl('ask', 'AAPL'), null);
 });
+
+test('getDataSourceUrl should return null for invalid symbols', () => {
+    assert.strictEqual(getDataSourceUrl('merolagani', 'AAPL;'), null);
+    assert.strictEqual(getDataSourceUrl('merolagani', 'AAPL/'), null);
+    assert.strictEqual(getDataSourceUrl('merolagani', 'AAPL<script>'), null);
+    assert.strictEqual(getDataSourceUrl('merolagani', 'AAPL '), null);
+});

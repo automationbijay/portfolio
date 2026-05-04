@@ -35,6 +35,11 @@ export const DATA_SOURCES: DataSource[] = [
 ];
 
 export const getDataSourceUrl = (key: DataSourceKey, symbol: string): string | null => {
+    // Validate symbol: alphanumeric characters only to prevent URL manipulation
+    if (!/^[a-zA-Z0-9]+$/.test(symbol)) {
+        return null;
+    }
+
     const source = DATA_SOURCES.find(s => s.key === key);
     return source ? source.url(symbol) : null;
 };

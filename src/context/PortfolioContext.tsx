@@ -471,7 +471,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
                 formData.append('trade_book_details', tradeBookFile);
             }
 
-            const response = await axios.post(WEBHOOK_URL, formData);
+            const response = await axios.post(WEBHOOK_URL, formData, { timeout: 30000 });
             // Handle both legacy array response and new object response with tradingHistory
             let result = [];
             let tradingHistory = null;
