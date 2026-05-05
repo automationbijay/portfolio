@@ -1,4 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+/**
+ * Security: axios 1.16.0+ resolves multiple critical/high vulnerabilities identified in February 2026,
+ * including SSRF (NO_PROXY bypass), Prototype Pollution gadgets (response tampering, hijacking),
+ * and various Denial of Service (DoS) risks present in versions <= 1.15.2.
+ */
 import axios from 'axios';
 import Papa from 'papaparse';
 import type { PortfolioContextValue, PortfolioState, Holding, WebhookHolding } from '../types';

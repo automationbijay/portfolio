@@ -1,0 +1,4 @@
+## 2026-02-05 - [CRITICAL] Axios Vulnerabilities (v1.16.0 Upgrade)
+**Vulnerability:** Multiple high-severity vulnerabilities were discovered in `axios` versions up to 1.15.2, including SSRF (NO_PROXY bypass), Prototype Pollution gadgets (allowing response tampering and request hijacking), and various Denial of Service (DoS) risks.
+**Learning:** Even well-established libraries like `axios` can have significant security gaps. The recent wave of vulnerabilities (February 2026) highlights the risk of "Prototype Pollution gadgets" that can be exploited even in environments that don't directly use vulnerable functions but merge configurations.
+**Prevention:** Regularly run `npm audit` and keep core dependencies updated to their latest stable versions. Use exact versions in `package.json` for critical security-sensitive libraries when a specific version is required to mitigate known CVEs.
