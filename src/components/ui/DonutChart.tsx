@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { formatCurrency } from '../../lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -48,7 +48,11 @@ export function DonutChart({ data, dataKey, nameKey, colors, centerLabel, center
     // 'Others' value is sum of rest. So sum of 'data' is total.
     // Sum of 'detailedData' should also be total.
     // So we can compute total from 'data'.
-    const totalValue = data.reduce((sum, d) => sum + d[dataKey], 0);
+    // ⚡ Bolt Performance Optimization:
+    // 💡 What: Memoized the computation of `totalValue`.
+    // 🎯 Why: This avoids a full array reduction over `data` to calculate its sum on every render.
+    // 📊 Impact: O(n) reduction is bypassed when `data` and `dataKey` remain unchanged, making rendering faster and saving CPU cycles, significantly improving performance when the chart contains many data points.
+    const totalValue = useMemo(() => data.reduce((sum, d) => sum + d[dataKey], 0), [data, dataKey]);
 
     return (
         <div className="space-y-6">

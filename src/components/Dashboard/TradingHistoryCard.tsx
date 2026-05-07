@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { History, Ticket, Gavel, ArrowRightLeft, TrendingUp, TrendingDown, Gift, Coins, ScrollText, Calendar, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
@@ -22,65 +23,72 @@ export function TradingHistoryCard() {
     const { state } = usePortfolio();
     const { tradingHistory, dividendDetails } = state;
 
-    // Calculate integrated dividend metrics
-    const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
-    const dividendCount = dividendDetails?.length || 0;
+    // ⚡ Bolt Performance Optimization:
+    // 💡 What: Memoized the calculation of `totalCashDividend`, `dividendCount`, `sections`, and `hasData`.
+    // 🎯 Why: Previously, these values were recalculated on every render, involving expensive operations like `reduce`, `map`, and `filter`.
+    // 📊 Impact: Prevents unnecessary recalculations and reduces the time complexity of the render function. This makes rendering significantly faster, especially when `dividendDetails` or `tradingHistory` are large arrays.
+    const { sections, hasData } = useMemo(() => {
+        const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
+        const dividendCount = dividendDetails?.length || 0;
 
-    const getStatsByCategory = () => {
-        if (!tradingHistory) return { market: [], rewards: [] };
+        const getStatsByCategory = () => {
+            if (!tradingHistory) return { market: [], rewards: [] };
 
-        const data = (tradingHistory as any).allTime || tradingHistory;
+            const data = (tradingHistory as any).allTime || tradingHistory;
 
-        const marketMapping = [
-            { key: 'iposAllotted', label: 'IPOs Allotted', format: (val: number) => val || 0 },
-            { key: 'fposAllotted', label: 'FPOs Allotted', format: (val: number) => val || 0 },
-            { key: 'auctionsAllotted', label: 'Auctions Allotted', format: (val: number) => val || 0 },
-            { key: 'mergedCompanies', label: 'Merged Companies', format: (val: number) => val || 0 },
-            { key: 'totalBuyEvents', label: 'Total Buy Events', format: (val: number) => val || 0 },
-            { key: 'totalSellEvents', label: 'Total Sell Events', format: (val: number) => val || 0 },
-        ];
+            const marketMapping = [
+                { key: 'iposAllotted', label: 'IPOs Allotted', format: (val: number) => val || 0 },
+                { key: 'fposAllotted', label: 'FPOs Allotted', format: (val: number) => val || 0 },
+                { key: 'auctionsAllotted', label: 'Auctions Allotted', format: (val: number) => val || 0 },
+                { key: 'mergedCompanies', label: 'Merged Companies', format: (val: number) => val || 0 },
+                { key: 'totalBuyEvents', label: 'Total Buy Events', format: (val: number) => val || 0 },
+                { key: 'totalSellEvents', label: 'Total Sell Events', format: (val: number) => val || 0 },
+            ];
 
-        const rewardsMapping = [
-            { key: 'bonusEvents', label: 'Bonus Share Events', format: (val: number) => val || 0 },
-            { key: 'rightShare', label: 'Right share alloted', format: (val: number) => val || 0 },
-        ];
+            const rewardsMapping = [
+                { key: 'bonusEvents', label: 'Bonus Share Events', format: (val: number) => val || 0 },
+                { key: 'rightShare', label: 'Right share alloted', format: (val: number) => val || 0 },
+            ];
 
-        const mapItem = (m: any) => {
-            const config = iconMap[m.label] || { icon: ScrollText, color: "text-slate-500", bg: "bg-slate-500/10" };
-            const rawValue = data[m.key];
-            const formattedValue = m.format ? m.format(rawValue) : rawValue;
-            return {
-                label: m.label,
-                value: formattedValue,
-                ...config
+            const mapItem = (m: any) => {
+                const config = iconMap[m.label] || { icon: ScrollText, color: "text-slate-500", bg: "bg-slate-500/10" };
+                const rawValue = data[m.key];
+                const formattedValue = m.format ? m.format(rawValue) : rawValue;
+                return {
+                    label: m.label,
+                    value: formattedValue,
+                    ...config
+                };
             };
+
+            const market = marketMapping
+                .map(m => mapItem(m));
+
+            const rewards = rewardsMapping
+                .map(m => mapItem(m));
+
+            // Add integrated dividend metrics to rewards
+            if (dividendCount > 0) {
+                rewards.push({
+                    label: 'Total Cash Divident',
+                    value: `रु ${totalCashDividend.toLocaleString('en-IN')}`,
+                    ...iconMap['Total Cash Divident']
+                });
+                rewards.push({
+                    label: 'Cash Divident frequency',
+                    value: `${dividendCount} Times`,
+                    ...iconMap['Cash Divident frequency']
+                });
+            }
+
+            return { market, rewards };
         };
 
-        const market = marketMapping
-            .map(m => mapItem(m));
+        const sections = getStatsByCategory();
+        const hasData = sections.market.length > 0 || sections.rewards.length > 0;
 
-        const rewards = rewardsMapping
-            .map(m => mapItem(m));
-
-        // Add integrated dividend metrics to rewards
-        if (dividendCount > 0) {
-            rewards.push({
-                label: 'Total Cash Divident',
-                value: `रु ${totalCashDividend.toLocaleString('en-IN')}`,
-                ...iconMap['Total Cash Divident']
-            });
-            rewards.push({
-                label: 'Cash Divident frequency',
-                value: `${dividendCount} Times`,
-                ...iconMap['Cash Divident frequency']
-            });
-        }
-
-        return { market, rewards };
-    };
-
-    const sections = getStatsByCategory();
-    const hasData = sections.market.length > 0 || sections.rewards.length > 0;
+        return { sections, hasData };
+    }, [dividendDetails, tradingHistory]);
 
     if (!tradingHistory || !hasData) {
         return (
