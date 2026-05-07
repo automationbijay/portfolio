@@ -98,9 +98,10 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
         setState(prev => ({ ...prev, loading: true }));
         try {
             const res = await axios.get(LTP_URL);
-            const map: Record<string, number> = {};
-            const changesMap: Record<string, number> = {};
-            const fundamentals: Record<string, any> = {};
+            // Use Object.create(null) to prevent prototype pollution from untrusted API data
+            const map: Record<string, number> = Object.create(null);
+            const changesMap: Record<string, number> = Object.create(null);
+            const fundamentals: Record<string, any> = Object.create(null);
             const data = res.data["all recent price"] || [];
 
             let nepseEntry: any = null;
@@ -166,12 +167,14 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
 
     // Pre-compute a dictionary for O(1) lookups whenever rawAnalysisData changes
     const dataMap = useMemo(() => {
-        const map: Record<string, any> = {};
+        // Use Object.create(null) to prevent prototype pollution from untrusted webhook data
+        const map: Record<string, any> = Object.create(null);
         if (state.rawAnalysisData && Array.isArray(state.rawAnalysisData)) {
             for (const item of state.rawAnalysisData) {
                 if (item && typeof item === 'object') {
                     for (const key in item) {
-                        if (map[key] === undefined) {
+                        // Skip sensitive keys and ensure we don't overwrite if multiple items have the same key
+                        if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype' && map[key] === undefined) {
                             map[key] = item[key];
                         }
                     }
@@ -558,6 +561,9 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
         localStorage.removeItem('portfolioDailyChanges');
         localStorage.removeItem('portfolioNepseData');
         localStorage.removeItem('portfolioFundamentals');
+        localStorage.removeItem('portfolioBrokerNo');
+        localStorage.removeItem('portfolioTradingHistory');
+        localStorage.removeItem('portfolioPlViewMode');
 
         setState({
             holdings: [],
