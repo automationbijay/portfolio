@@ -166,8 +166,8 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {sortedHoldings.map((item, idx) => (
-                    <Card key={idx} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
+                {sortedHoldings.map((item) => (
+                    <Card key={item.scrip} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
                         <CardContent className="p-0">
                             <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x border-border/40">
                                 {/* Scrip Info */}
