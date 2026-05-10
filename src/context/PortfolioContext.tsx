@@ -98,9 +98,9 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
         setState(prev => ({ ...prev, loading: true }));
         try {
             const res = await axios.get(LTP_URL);
-            const map: Record<string, number> = {};
-            const changesMap: Record<string, number> = {};
-            const fundamentals: Record<string, any> = {};
+            const map: Record<string, number> = Object.create(null);
+            const changesMap: Record<string, number> = Object.create(null);
+            const fundamentals: Record<string, any> = Object.create(null);
             const data = res.data["all recent price"] || [];
 
             let nepseEntry: any = null;
@@ -166,7 +166,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
 
     // Pre-compute a dictionary for O(1) lookups whenever rawAnalysisData changes
     const dataMap = useMemo(() => {
-        const map: Record<string, any> = {};
+        const map: Record<string, any> = Object.create(null);
         if (state.rawAnalysisData && Array.isArray(state.rawAnalysisData)) {
             for (const item of state.rawAnalysisData) {
                 if (item && typeof item === 'object') {
@@ -200,12 +200,13 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             Holdings: item.Holdings || item["Eligible Holdings"] || 0
         }));
 
-        const dividendMap: Record<string, number> = {};
+        const dividendMap: Record<string, number> = Object.create(null);
         activeDividends.forEach((d: any) => {
             if (d.Scrip) {
                 dividendMap[d.Scrip] = (dividendMap[d.Scrip] || 0) + (d["Dividend Amount"] || 0);
             }
         });
+
 
         const webhookHoldings = findDataByKey("current holdings in meroshare");
 
