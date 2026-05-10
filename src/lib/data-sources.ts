@@ -10,27 +10,27 @@ export const DATA_SOURCES: DataSource[] = [
     {
         key: 'merolagani',
         name: 'Merolagani',
-        url: (symbol) => `https://merolagani.com/CompanyDetail.aspx?symbol=${symbol}#0`
+        url: (symbol) => `https://merolagani.com/CompanyDetail.aspx?symbol=${encodeURIComponent(symbol)}#0`
     },
     {
         key: 'sharesansar',
         name: 'ShareSansar',
-        url: (symbol) => `https://www.sharesansar.com/company/${symbol}`
+        url: (symbol) => `https://www.sharesansar.com/company/${encodeURIComponent(symbol)}`
     },
     {
         key: 'nepsealpha',
         name: 'NepseAlpha',
-        url: (symbol) => `https://nepsealpha.com/search?q=${symbol}`
+        url: (symbol) => `https://nepsealpha.com/search?q=${encodeURIComponent(symbol)}`
     },
     {
         key: 'nepalipaisa',
         name: 'NepaliPaisa',
-        url: (symbol) => `https://nepalipaisa.com/company/${symbol}`
+        url: (symbol) => `https://nepalipaisa.com/company/${encodeURIComponent(symbol)}`
     },
     {
         key: 'moneymitra',
         name: 'MoneyMitra',
-        url: (symbol) => `https://moneymitra.com/login/?next=/guru-mantra/company/${symbol}/`
+        url: (symbol) => `https://moneymitra.com/login/?next=/guru-mantra/company/${encodeURIComponent(symbol)}/`
     }
 ];
 
