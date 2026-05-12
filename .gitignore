@@ -25,3 +25,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sensitive financial data
+*.csv
+*.xlsx
+debug_ltp.json
+recentltp.json
+webhook_response.json
+webhook_validation_result.json
