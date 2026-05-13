@@ -1,3 +1,3 @@
-## 2026-04-29 - Memoization in Dashboard Charts
-**Learning:** Found an opportunity to use useMemo in React to prevent recalculating array operations and sorts for UI charts that only need to recalculate when the specific list changes.
-**Action:** Next time looking for optimization, verify if we have data transformations (like map, sort, reduce) happening in render body and wrap them in useMemo.
+## 2024-05-13 - [HoldingsTable / Timeline Performance Improvements]
+**Learning:** React list rendering performance bottleneck due to missing `React.memo` for complex child elements and recreating strings during inner loops (like `searchQuery.toLowerCase()` inside a `.filter` block). Additionally, utilizing array indices as keys inhibits React's ability to skip renders.
+**Action:** Extract large list elements into `React.memo()` components, cache expensive computations out of iterative methods, and employ unique, stable IDs as list keys to minimize unnecessary rendering.
