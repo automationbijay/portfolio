@@ -352,6 +352,8 @@ export const Timeline: React.FC = () => {
     }, [state.holdings, searchContextEvents, isSingleScrip, uniqueScripsInSearch, state.ltpData]);
 
 
+    const lowerSearchQuery = searchQuery.toLowerCase();
+
     return (
         <div className="min-h-screen bg-background relative pb-32 animate-in fade-in duration-500">
             {/* Grid Pattern Background */}
@@ -402,7 +404,7 @@ export const Timeline: React.FC = () => {
                         {isDropdownOpen && (
                             <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-lg max-h-[300px] overflow-y-auto no-scrollbar z-50 animate-in fade-in zoom-in-95 p-1">
                                 {allAvailableScrips
-                                    .filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+                                    .filter(s => s.toLowerCase().includes(lowerSearchQuery))
                                     .map((scrip) => (
                                         <button
                                             key={scrip}
@@ -419,7 +421,7 @@ export const Timeline: React.FC = () => {
                                             )}
                                         </button>
                                     ))}
-                                {allAvailableScrips.filter(s => s.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                                {allAvailableScrips.filter(s => s.toLowerCase().includes(lowerSearchQuery)).length === 0 && (
                                     <div className="px-3 py-4 text-center text-sm text-muted-foreground">
                                         No scrips found
                                     </div>

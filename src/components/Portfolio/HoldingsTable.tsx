@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowUpDown, Briefcase, Search } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import type { Holding } from '../../types';
@@ -20,6 +20,94 @@ interface HoldingsTableProps {
     onSelectScrip: (scrip: string) => void;
 }
 
+
+const HoldingCard = React.memo(({
+    item,
+    dailyChange,
+    plViewMode,
+    onSymbolClick,
+    onSelectScrip
+}: {
+    item: Holding,
+    dailyChange: number | undefined,
+    plViewMode: 'adjusted' | 'unadjusted',
+    onSymbolClick: (scrip: string) => void,
+    onSelectScrip: (scrip: string) => void
+}) => {
+    return (
+        <Card className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
+            <CardContent className="p-0">
+                <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x border-border/40">
+                    {/* Scrip Info */}
+                    <div
+                        className="p-5 flex-grow flex items-center gap-4 transition-colors group-hover/card:bg-primary/5 min-w-0 cursor-pointer hover:bg-primary/10"
+                        onClick={() => onSymbolClick(item.scrip)}
+                    >
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-col gap-0.5">
+                                <h4
+                                    className="font-bold text-lg text-foreground tracking-tight transition-colors truncate pr-2 group-hover/card:text-primary"
+                                    title={item.companyName}
+                                >
+                                    {item.companyName}
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                        {item.scrip}
+                                    </span>
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        <Briefcase className="w-3 h-3 text-primary/70" />
+                                        {item.quantity} Units
+                                    </div>
+                                </div>
+                            </div>
+
+                            {dailyChange !== undefined && dailyChange !== 0 && (
+                                <div className={cn("mt-2 text-[11px] font-black flex items-center gap-1.5", dailyChange > 0 ? "text-green-500" : "text-red-500")}>
+                                    Today: रु {dailyChange > 0 ? '+' : '-'}{formatCurrency(Math.abs(dailyChange * item.quantity))}
+                                    <span className="opacity-70 text-[9px] bg-muted/50 px-1.5 py-0.5 rounded border border-current/20">
+                                        {((dailyChange / (item.ltp - dailyChange)) * 100).toFixed(2)}%
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* LTP & Value info */}
+                    <div
+                        className="p-5 sm:w-48 flex flex-col justify-center sm:items-end transition-colors group-hover/card:bg-primary/5 cursor-pointer hover:bg-primary/10"
+                        onClick={() => onSelectScrip(item.scrip)}
+                    >
+                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-70">Current Value</div>
+                        <div className="font-mono font-black text-foreground text-xl tracking-tighter">
+                            रु {formatCurrency(item.currentValue)}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">
+                            LTP: <span className="text-primary">{formatNumber(item.ltp)}</span>
+                        </div>
+                    </div>
+
+                    {/* Profit/Loss */}
+                    <div
+                        className={cn("p-5 sm:w-56 flex flex-col justify-center sm:items-end transition-colors sm:bg-primary/5 cursor-pointer hover:opacity-80", (plViewMode === 'adjusted' ? (item.plWithCashflow ?? item.pl) : item.pl) >= 0 ? "text-green-500 bg-green-500/5" : "text-red-500 bg-red-500/5")}
+                        onClick={() => onSelectScrip(item.scrip)}
+                    >
+                        <div className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">
+                            {plViewMode === 'adjusted' ? 'Profit/Loss (Adj.)' : 'Profit/Loss'}
+                        </div>
+                        <div className="font-mono font-black text-xl tracking-tighter flex items-center gap-1">
+                            रु {(plViewMode === 'adjusted' ? (item.plWithCashflow ?? item.pl) : item.pl) >= 0 ? '+' : '-'}{formatCurrency(Math.abs(plViewMode === 'adjusted' ? (item.plWithCashflow ?? item.pl) : item.pl))}
+                        </div>
+                        <div className="text-[10px] font-black uppercase tracking-wider mt-1 bg-background/50 px-2 py-0.5 rounded border border-current/20">
+                            {(plViewMode === 'adjusted' ? (item.plWithCashflowPercent ?? item.plPercent) : item.plPercent).toFixed(2)}%
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+});
+
 export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
     const { state, state: { holdings, portfolioSummary } } = usePortfolio();
     const { investment, value, pl, plPercent, activeDividendTotal, scripCount, plWithCashflow, plWithCashflowPercent } = portfolioSummary;
@@ -30,9 +118,10 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
         const { key, direction } = sortConfig;
 
         // Filter first
+        const lowerQuery = searchQuery.toLowerCase();
         const filtered = holdings.filter(item =>
-            item.scrip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.scrip.toLowerCase().includes(lowerQuery) ||
+            (item.companyName && item.companyName.toLowerCase().includes(lowerQuery))
         );
 
         return [...filtered].sort((a, b) => {
@@ -166,78 +255,15 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {sortedHoldings.map((item, idx) => (
-                    <Card key={idx} className="overflow-hidden border-none bg-gradient-to-br from-primary/5 via-card to-background shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card">
-                        <CardContent className="p-0">
-                            <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x border-border/40">
-                                {/* Scrip Info */}
-                                <div
-                                    className="p-5 flex-grow flex items-center gap-4 transition-colors group-hover/card:bg-primary/5 min-w-0 cursor-pointer hover:bg-primary/10"
-                                    onClick={() => handleSymbolClick(item.scrip)}
-                                >
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex flex-col gap-0.5">
-                                            <h4
-                                                className="font-bold text-lg text-foreground tracking-tight transition-colors truncate pr-2 group-hover/card:text-primary"
-                                                title={item.companyName}
-                                            >
-                                                {item.companyName}
-                                            </h4>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                                    {item.scrip}
-                                                </span>
-                                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                                    <Briefcase className="w-3 h-3 text-primary/70" />
-                                                    {item.quantity} Units
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {state.dailyChanges[item.scrip] !== undefined && state.dailyChanges[item.scrip] !== 0 && (
-                                            <div className={cn("mt-2 text-[11px] font-black flex items-center gap-1.5", state.dailyChanges[item.scrip] > 0 ? "text-green-500" : "text-red-500")}>
-                                                Today: रु {state.dailyChanges[item.scrip] > 0 ? '+' : '-'}{formatCurrency(Math.abs(state.dailyChanges[item.scrip] * item.quantity))}
-                                                <span className="opacity-70 text-[9px] bg-muted/50 px-1.5 py-0.5 rounded border border-current/20">
-                                                    {((state.dailyChanges[item.scrip] / (item.ltp - state.dailyChanges[item.scrip])) * 100).toFixed(2)}%
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-
-                                {/* LTP & Value info */}
-                                <div
-                                    className="p-5 sm:w-48 flex flex-col justify-center sm:items-end transition-colors group-hover/card:bg-primary/5 cursor-pointer hover:bg-primary/10"
-                                    onClick={() => onSelectScrip(item.scrip)}
-                                >
-                                    <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-70">Current Value</div>
-                                    <div className="font-mono font-black text-foreground text-xl tracking-tighter">
-                                        रु {formatCurrency(item.currentValue)}
-                                    </div>
-                                    <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">
-                                        LTP: <span className="text-primary">{formatNumber(item.ltp)}</span>
-                                    </div>
-                                </div>
-
-                                {/* Profit/Loss */}
-                                <div
-                                    className={cn("p-5 sm:w-56 flex flex-col justify-center sm:items-end transition-colors sm:bg-primary/5 cursor-pointer hover:opacity-80", (state.plViewMode === 'adjusted' ? (item.plWithCashflow ?? item.pl) : item.pl) >= 0 ? "text-green-500 bg-green-500/5" : "text-red-500 bg-red-500/5")}
-                                    onClick={() => onSelectScrip(item.scrip)}
-                                >
-                                    <div className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">
-                                        {state.plViewMode === 'adjusted' ? 'Profit/Loss (Adj.)' : 'Profit/Loss'}
-                                    </div>
-                                    <div className="font-mono font-black text-xl tracking-tighter flex items-center gap-1">
-                                        रु {(state.plViewMode === 'adjusted' ? (item.plWithCashflow ?? item.pl) : item.pl) >= 0 ? '+' : '-'}{formatCurrency(Math.abs(state.plViewMode === 'adjusted' ? (item.plWithCashflow ?? item.pl) : item.pl))}
-                                    </div>
-                                    <div className="text-[10px] font-black uppercase tracking-wider mt-1 bg-background/50 px-2 py-0.5 rounded border border-current/20">
-                                        {(state.plViewMode === 'adjusted' ? (item.plWithCashflowPercent ?? item.plPercent) : item.plPercent).toFixed(2)}%
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                {sortedHoldings.map((item) => (
+                    <HoldingCard
+                        key={item.scrip}
+                        item={item}
+                        dailyChange={state.dailyChanges[item.scrip]}
+                        plViewMode={state.plViewMode}
+                        onSymbolClick={handleSymbolClick}
+                        onSelectScrip={onSelectScrip}
+                    />
                 ))}
             </div>
 
