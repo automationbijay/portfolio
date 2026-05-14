@@ -18,7 +18,10 @@ export function ScripDetails({ scrip, onBack }: ScripDetailsProps) {
 
     const scripTransactions = useMemo(() => {
         if (!transactionHistory) return [];
-        return transactionHistory.filter(t => t.Scrip === scrip);
+        // Filter and sort transactions by date (newest first)
+        return transactionHistory
+            .filter(t => t.Scrip === scrip)
+            .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
     }, [transactionHistory, scrip]);
 
     // Get dividends for this scrip
@@ -299,7 +302,7 @@ export function ScripDetails({ scrip, onBack }: ScripDetailsProps) {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/20">
-                                        {[...scripTransactions].sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime()).map((tx, idx) => (
+                                        {scripTransactions.map((tx, idx) => (
                                             <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/tx">
                                                 <td className="p-4">
                                                     <div className="text-sm font-black font-mono text-foreground opacity-90">{tx.Date}</div>
