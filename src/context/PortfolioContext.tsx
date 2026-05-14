@@ -97,7 +97,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
         }
         setState(prev => ({ ...prev, loading: true }));
         try {
-            const res = await axios.get(LTP_URL);
+            const res = await axios.get(LTP_URL, { timeout: 15000 });
             const map: Record<string, number> = {};
             const changesMap: Record<string, number> = {};
             const fundamentals: Record<string, any> = {};
@@ -154,8 +154,8 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             localStorage.setItem('portfolioFundamentals', JSON.stringify(fundamentals));
             if (nepseEntry) localStorage.setItem('portfolioNepseData', JSON.stringify(nepseEntry));
         } catch (error: unknown) {
-            console.error("Failed to fetch LTP", error instanceof Error ? error.message : error);
-            setState(prev => ({ ...prev, loading: false }));
+            console.error("Failed to fetch LTP", error);
+            setState(prev => ({ ...prev, loading: false, error: "Failed to sync market prices. Please try again later." }));
         }
     }, []);
 
@@ -471,7 +471,7 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
                 formData.append('trade_book_details', tradeBookFile);
             }
 
-            const response = await axios.post(WEBHOOK_URL, formData);
+            const response = await axios.post(WEBHOOK_URL, formData, { timeout: 30000 });
             // Handle both legacy array response and new object response with tradingHistory
             let result = [];
             let tradingHistory = null;
@@ -506,8 +506,8 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             }));
 
         } catch (err: unknown) {
-            console.error(err);
-            const errorMessage = err instanceof Error ? err.message : "Failed to analyze portfolio. Please try again.";
+            console.error("Analysis failed:", err);
+            const errorMessage = "An error occurred while analyzing your portfolio. Please ensure your files are correct and try again.";
             setState(prev => ({ ...prev, loading: false, error: errorMessage }));
             throw err;
         }
