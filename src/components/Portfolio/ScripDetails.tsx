@@ -28,7 +28,9 @@ export function ScripDetails({ scrip, onBack }: ScripDetailsProps) {
         ),
         [activeDividends, scrip]);
 
-    const totalCashDividends = scripDividends.reduce((sum, d) => sum + (d["Dividend Amount"] || 0), 0);
+    // ⚡ Bolt: Memoized the reduction of total cash dividends for a specific scrip.
+    // Impact: Avoids O(n) recalculation on every state change when only viewing the scrip details.
+    const totalCashDividends = useMemo(() => scripDividends.reduce((sum, d) => sum + (d["Dividend Amount"] || 0), 0), [scripDividends]);
 
     // Get value history from LTP data (mock/active)
     const ltp = ltpData[scrip] || holding?.ltp || 0;

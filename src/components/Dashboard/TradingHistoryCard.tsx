@@ -1,4 +1,5 @@
 import { History, Ticket, Gavel, ArrowRightLeft, TrendingUp, TrendingDown, Gift, Coins, ScrollText, Calendar, Activity } from 'lucide-react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { usePortfolio } from '../../context/PortfolioContext';
 
@@ -23,10 +24,19 @@ export function TradingHistoryCard() {
     const { tradingHistory, dividendDetails } = state;
 
     // Calculate integrated dividend metrics
-    const totalCashDividend = dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0;
-    const dividendCount = dividendDetails?.length || 0;
+    // ⚡ Bolt: Memoized dividend calculations to prevent expensive O(n) reduction on every render.
+    // Impact: Avoids unnecessary array iteration when other state changes (e.g. daily LTP updates).
+    const { totalCashDividend, dividendCount } = useMemo(() => {
+        return {
+            totalCashDividend: dividendDetails?.reduce((sum, item) => sum + (item["Dividend Amount"] || 0), 0) || 0,
+            dividendCount: dividendDetails?.length || 0
+        };
+    }, [dividendDetails]);
 
-    const getStatsByCategory = () => {
+    // ⚡ Bolt: Memoized the formatting and object creation of market/rewards statistics.
+    // Impact: Prevents creating multiple new arrays and objects on every render cycle,
+    // reducing garbage collection overhead and preventing unnecessary child re-renders.
+    const sections = useMemo(() => {
         if (!tradingHistory) return { market: [], rewards: [] };
 
         const data = (tradingHistory as any).allTime || tradingHistory;
@@ -77,9 +87,7 @@ export function TradingHistoryCard() {
         }
 
         return { market, rewards };
-    };
-
-    const sections = getStatsByCategory();
+    }, [tradingHistory, dividendCount, totalCashDividend]);
     const hasData = sections.market.length > 0 || sections.rewards.length > 0;
 
     if (!tradingHistory || !hasData) {
