@@ -62,7 +62,8 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
         if (state.preferredDataSource && state.preferredDataSource !== 'ask') {
             const url = getDataSourceUrl(state.preferredDataSource, symbol);
             if (url) {
-                window.open(url, '_blank');
+                // Security: Use noopener,noreferrer to prevent reverse tabnabbing
+                window.open(url, '_blank', 'noopener,noreferrer');
                 return;
             }
         }

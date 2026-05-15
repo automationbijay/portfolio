@@ -33,6 +33,14 @@ test('getDataSourceUrl should return correct URLs for all sources', () => {
     });
 });
 
+test('getDataSourceUrl should sanitize symbol input', () => {
+    const symbol = 'ABC & 123';
+    const encodedSymbol = encodeURIComponent(symbol);
+    const url = getDataSourceUrl('merolagani', symbol);
+    assert.ok(url?.includes(encodedSymbol));
+    assert.ok(!url?.includes(symbol));
+});
+
 test('getDataSourceUrl should return null for unsupported keys', () => {
     // @ts-expect-error Testing invalid runtime input
     assert.strictEqual(getDataSourceUrl('unsupported', 'AAPL'), null);
