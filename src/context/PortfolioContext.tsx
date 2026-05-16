@@ -73,7 +73,6 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             if (storedHoldings) setHoldingsRawData(JSON.parse(storedHoldings));
             if (storedLastUpdated) setState(prev => ({ ...prev, lastUpdated: new Date(storedLastUpdated) }));
             if (storedBrokerNo) setState(prev => ({ ...prev, brokerNo: parseInt(storedBrokerNo) }));
-            if (storedBrokerNo) setState(prev => ({ ...prev, brokerNo: parseInt(storedBrokerNo) }));
             const storedPlViewMode = localStorage.getItem('portfolioPlViewMode');
             if (storedPlViewMode === 'unadjusted' || storedPlViewMode === 'adjusted') {
                 setState(prev => ({ ...prev, plViewMode: storedPlViewMode }));
@@ -530,10 +529,15 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
     const updateBrokerNo = (no: number | null) => {
         if (no === null) {
             localStorage.removeItem('portfolioBrokerNo');
+            setState(prev => ({ ...prev, brokerNo: null }));
         } else {
-            localStorage.setItem('portfolioBrokerNo', no.toString());
+            // Defense: strictly validate broker number range 1-100
+            const val = Math.floor(no);
+            if (val >= 1 && val <= 100) {
+                localStorage.setItem('portfolioBrokerNo', val.toString());
+                setState(prev => ({ ...prev, brokerNo: val }));
+            }
         }
-        setState(prev => ({ ...prev, brokerNo: no }));
     };
 
     const updatePlViewMode = (mode: 'unadjusted' | 'adjusted') => {
