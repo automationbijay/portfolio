@@ -411,12 +411,12 @@ export function Settings({ onImportSuccess, onNavigateToTimeline, defaultSection
                             </CardHeader>
                             <CardContent className="p-8 prose prose-sm dark:prose-invert max-w-none space-y-6">
                                 <p className="text-foreground/80 font-bold leading-relaxed">
-                                    Your privacy is critically important to us. This application operates completely on the client-side, meaning:
+                                    Your privacy is critically important to us. This application focuses on secure, private data management:
                                 </p>
                                 <div className="grid gap-4">
                                     <div className="p-4 rounded-xl bg-muted/30 border border-border/40">
-                                        <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-1">No Server Uploads</h4>
-                                        <p className="text-xs text-muted-foreground leading-relaxed">Your financial data (WACC, History, Holdings) is processed locally in your browser and is never uploaded to any external server.</p>
+                                        <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-1">Secure Analysis</h4>
+                                        <p className="text-xs text-muted-foreground leading-relaxed">Your financial data is transmitted to a secure webhook for analysis. Results are returned to your browser, but your raw data is not stored permanently on any server.</p>
                                     </div>
                                     <div className="p-4 rounded-xl bg-muted/30 border border-border/40">
                                         <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-1">Local Storage</h4>
