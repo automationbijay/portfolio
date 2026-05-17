@@ -73,7 +73,6 @@ export const PortfolioProvider: React.FC<PortfolioProviderProps> = ({ children }
             if (storedHoldings) setHoldingsRawData(JSON.parse(storedHoldings));
             if (storedLastUpdated) setState(prev => ({ ...prev, lastUpdated: new Date(storedLastUpdated) }));
             if (storedBrokerNo) setState(prev => ({ ...prev, brokerNo: parseInt(storedBrokerNo) }));
-            if (storedBrokerNo) setState(prev => ({ ...prev, brokerNo: parseInt(storedBrokerNo) }));
             const storedPlViewMode = localStorage.getItem('portfolioPlViewMode');
             if (storedPlViewMode === 'unadjusted' || storedPlViewMode === 'adjusted') {
                 setState(prev => ({ ...prev, plViewMode: storedPlViewMode }));

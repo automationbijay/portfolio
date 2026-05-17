@@ -415,8 +415,8 @@ export function Settings({ onImportSuccess, onNavigateToTimeline, defaultSection
                                 </p>
                                 <div className="grid gap-4">
                                     <div className="p-4 rounded-xl bg-muted/30 border border-border/40">
-                                        <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-1">No Server Uploads</h4>
-                                        <p className="text-xs text-muted-foreground leading-relaxed">Your financial data (WACC, History, Holdings) is processed locally in your browser and is never uploaded to any external server.</p>
+                                        <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-1">Privacy First Approach</h4>
+                                        <p className="text-xs text-muted-foreground leading-relaxed">Your financial data (WACC, History, Holdings) is primarily processed locally. Deep historical analysis is performed via a secure, transient webhook that does not permanently store your raw data.</p>
                                     </div>
                                     <div className="p-4 rounded-xl bg-muted/30 border border-border/40">
                                         <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-1">Local Storage</h4>
