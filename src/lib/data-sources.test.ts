@@ -8,23 +8,23 @@ test('getDataSourceUrl should return correct URLs for all sources', () => {
     const cases: { key: DataSourceKey; expected: string }[] = [
         {
             key: 'merolagani',
-            expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${symbol}#0`
+            expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${encodeURIComponent(symbol)}#0`
         },
         {
             key: 'sharesansar',
-            expected: `https://www.sharesansar.com/company/${symbol}`
+            expected: `https://www.sharesansar.com/company/${encodeURIComponent(symbol)}`
         },
         {
             key: 'nepsealpha',
-            expected: `https://nepsealpha.com/search?q=${symbol}`
+            expected: `https://nepsealpha.com/search?q=${encodeURIComponent(symbol)}`
         },
         {
             key: 'nepalipaisa',
-            expected: `https://nepalipaisa.com/company/${symbol}`
+            expected: `https://nepalipaisa.com/company/${encodeURIComponent(symbol)}`
         },
         {
             key: 'moneymitra',
-            expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${symbol}/`
+            expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${encodeURIComponent(symbol)}/`
         }
     ];
 
