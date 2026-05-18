@@ -4,27 +4,28 @@ import { getDataSourceUrl, type DataSourceKey } from './data-sources.ts';
 
 test('getDataSourceUrl should return correct URLs for all sources', () => {
     const symbol = 'AAPL';
+    const encoded = encodeURIComponent(symbol);
 
     const cases: { key: DataSourceKey; expected: string }[] = [
         {
             key: 'merolagani',
-            expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${symbol}#0`
+            expected: `https://merolagani.com/CompanyDetail.aspx?symbol=${encoded}#0`
         },
         {
             key: 'sharesansar',
-            expected: `https://www.sharesansar.com/company/${symbol}`
+            expected: `https://www.sharesansar.com/company/${encoded}`
         },
         {
             key: 'nepsealpha',
-            expected: `https://nepsealpha.com/search?q=${symbol}`
+            expected: `https://nepsealpha.com/search?q=${encoded}`
         },
         {
             key: 'nepalipaisa',
-            expected: `https://nepalipaisa.com/company/${symbol}`
+            expected: `https://nepalipaisa.com/company/${encoded}`
         },
         {
             key: 'moneymitra',
-            expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${symbol}/`
+            expected: `https://moneymitra.com/login/?next=/guru-mantra/company/${encoded}/`
         }
     ];
 
