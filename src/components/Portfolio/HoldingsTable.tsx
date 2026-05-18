@@ -30,9 +30,10 @@ export function HoldingsTable({ onSelectScrip }: HoldingsTableProps) {
         const { key, direction } = sortConfig;
 
         // Filter first
+        const query = searchQuery.toLowerCase();
         const filtered = holdings.filter(item =>
-            item.scrip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.scrip.toLowerCase().includes(query) ||
+            (item.companyName && item.companyName.toLowerCase().includes(query))
         );
 
         return [...filtered].sort((a, b) => {
