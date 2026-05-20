@@ -21,6 +21,10 @@ dist-ssr
 .idea
 .DS_Store
 *.suo
+
+# Sensitive data exports
+*.csv
+*.xlsx
 *.ntvs*
 *.njsproj
 *.sln
